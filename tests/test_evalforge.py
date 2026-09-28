@@ -64,6 +64,18 @@ def test_regression_traps_are_tagged_and_target_a_declared_mode() -> None:
         assert case["target_failure_mode"] in case["failure_mode_tags"]
 
 
+def test_small_complete_set_keeps_all_case_types_and_mode_coverage() -> None:
+    spec = load_spec(TICKET_SPEC)
+    result = forge(spec, n=4, seed=8)
+    assert {case["case_type"] for case in result["cases"]} == {
+        "normal",
+        "edge",
+        "adversarial",
+        "regression_trap",
+    }
+    assert lint_eval_set(result, spec) == []
+
+
 def test_adding_failure_mode_adds_tagged_cases_without_generator_changes() -> None:
     spec = load_spec(TICKET_SPEC)
     extended = copy.deepcopy(spec)

@@ -71,7 +71,7 @@ difficulty_knobs:
 
 Templates can use `{{case_id}}`, `{{index}}`, `{{seed}}`, `{{variant}}`, `{{failure_mode}}`, `{{case_type}}`, and `{{difficulty}}` in string values in either inputs or ground truth. `index` is the one-based position in the generated set. `variant` counts generated examples for the target failure mode. These fields let a spec produce distinct, reproducible synthetic records without editing the generator when a failure mode is added.
 
-`difficulty_knobs.levels` defaults to `[easy, medium, hard]`. The optional `difficulty_distribution` and `case_type_distribution` mappings set non-negative weights. Case types are `normal`, `edge`, `adversarial`, and `regression_trap`. EvalForge guarantees a trap targeting every declared failure mode when the requested case count is at least the number of modes. For sets with at least four cases it also includes each case type.
+`difficulty_knobs.levels` defaults to `[easy, medium, hard]`. The optional `difficulty_distribution` and `case_type_distribution` mappings set non-negative weights. Case types are `normal`, `edge`, `adversarial`, and `regression_trap`. EvalForge includes all four case types when at least four cases are requested. It targets every declared failure mode with a trap when the set has room for one trap per mode plus the other three case types. When the set is smaller than its mode list, lint reports the uncovered modes.
 
 The invoice example declares comparison tolerances alongside its success criteria: amounts may differ by at most 0.01 currency units, and dates use ISO 8601 with zero-day tolerance. These values describe how a downstream evaluator should compare extracted fields; EvalForge records the labeled ground truth and does not score model outputs.
 

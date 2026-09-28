@@ -155,20 +155,27 @@ def forge(spec: dict[str, Any], n: int = 200, seed: int = 42) -> dict[str, Any]:
     knobs = spec["difficulty_knobs"]
     levels = knobs.get("levels", ["easy", "medium", "hard"])
 
-    # Guarantee one trap per declared failure mode whenever the requested set
-    # is large enough, followed by at least one of each other case type.
-    schedule: list[tuple[str, str]] = []
-    trap_count = min(n, len(modes))
-    schedule.extend(("regression_trap", mode_ids[index]) for index in range(trap_count))
-    for case_type in ("normal", "edge", "adversarial"):
-        if len(schedule) < n:
-            mode_id = mode_ids[len(schedule) % len(mode_ids)]
-            schedule.append((case_type, mode_id))
+    # Preserve all four case types in ordinary set sizes. When there is room
+    # for every mode's trap plus three other types, target each mode with one.
+    schedule: list[tuple[str, str | None]] = []
+    if n >= len(modes) + len(CASE_TYPES) - 1:
+        schedule.extend(("regression_trap", mode_id) for mode_id in mode_ids)
+        schedule.extend((case_type, None) for case_type in ("normal", "edge", "adversarial"))
+    elif n >= len(CASE_TYPES):
+        schedule.extend((case_type, None) for case_type in CASE_TYPES)
+        while len(schedule) < min(n, len(modes)):
+            mode_id = mode_ids[len(schedule)]
+            schedule.append(("regression_trap", mode_id))
+    else:
+        schedule.extend(("regression_trap", mode_id) for mode_id in mode_ids[:min(n, len(modes))])
+        for case_type in ("normal", "edge", "adversarial"):
+            if len(schedule) < n:
+                schedule.append((case_type, None))
 
     remaining = n - len(schedule)
     extra_types = _weighted_order(list(CASE_TYPES), knobs.get("case_type_distribution", {}), remaining, seed)
     for case_type in extra_types:
-        schedule.append((case_type, rng.choice(mode_ids)))
+        schedule.append((case_type, None))
 
     difficulty_schedule = _weighted_order(list(levels), knobs.get("difficulty_distribution", {}), n, seed)
     # Ensure every configured difficulty is represented in ordinary eval sizes.
@@ -177,7 +184,8 @@ def forge(spec: dict[str, Any], n: int = 200, seed: int = 42) -> dict[str, Any]:
 
     mode_counts: Counter[str] = Counter()
     cases = []
-    for index, (case_type, mode_id) in enumerate(schedule, start=1):
+    for index, (case_type, target_mode_id) in enumerate(schedule, start=1):
+        mode_id = target_mode_id or (mode_ids[index - 1] if index <= len(mode_ids) else rng.choice(mode_ids))
         mode = next(item for item in modes if item["id"] == mode_id)
         mode_counts[mode_id] += 1
         difficulty = difficulty_schedule[index - 1]
