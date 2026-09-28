@@ -1,0 +1,4 @@
+Test count: 12 passed
+Local commit hash: b7c46ac1157b24f5de475ad8ae3ab6835e71f170
+
+EvalForge is a CPU-only Python CLI that forges deterministic, seeded, versioned synthetic evaluation sets from YAML task specs, including normal, edge, adversarial, and failure-mode-targeted regression-trap cases. It provides lint checks for duplicate and inconsistent cases, declared-mode coverage, difficulty levels, and trap tags, plus case and coverage diffs. The repository includes a task-spec JSON Schema, support-ticket triage and invoice extraction examples, documented invoice tolerances, a full README, and 12 passing tests. All generated data is explicitly labeled synthetic.
