@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalforge.local/task-spec.schema.json",
+  "title": "EvalForge task specification",
+  "type": "object",
+  "required": ["name", "description", "tools", "success_criteria", "failure_modes", "difficulty_knobs"],
+  "properties": {
+    "name": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "input_schema"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "description": {"type": "string"},
+          "input_schema": {"type": "object"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "success_criteria": {"type": "array", "minItems": 1},
+    "evaluation_tolerances": {
+      "type": "object",
+      "properties": {
+        "amount_absolute": {"type": "number", "minimum": 0},
+        "amount_currency_units": {"type": "boolean"},
+        "date_format": {"type": "string"},
+        "date_tolerance_days": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "failure_modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "example"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]*$"},
+          "description": {"type": "string", "minLength": 1},
+          "example": {"$ref": "#/$defs/caseExample"},
+          "edge_example": {"$ref": "#/$defs/caseExample"},
+          "adversarial_example": {"$ref": "#/$defs/caseExample"},
+          "trap_example": {"$ref": "#/$defs/caseExample"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "difficulty_knobs": {
+      "type": "object",
+      "properties": {
+        "levels": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+        "difficulty_distribution": {"$ref": "#/$defs/weights"},
+        "case_type_distribution": {"$ref": "#/$defs/weights"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "caseExample": {
+      "type": "object",
+      "required": ["inputs", "ground_truth"],
+      "properties": {
+        "inputs": {},
+        "ground_truth": {"not": {"type": "null"}}
+      },
+      "additionalProperties": true
+    },
+    "weights": {
+      "type": "object",
+      "additionalProperties": {"type": "number", "minimum": 0}
+    }
+  },
+  "additionalProperties": true
+}

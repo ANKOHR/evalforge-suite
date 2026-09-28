@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evalforge"
+version = "0.1.0"
+description = "Deterministic, synthetic evaluation set generation for agent tasks"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0"]
+
+[project.scripts]
+evalforge = "evalforge.cli:main"
+
+[tool.setuptools]
+packages = ["evalforge"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
